@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>KOITOHANA · 三维建模与渲染作品集</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #1A1A1A;
+            font-family: 'Inter', system-ui, sans-serif;
+            color: #ffffff;
+            line-height: 1.5;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        body.modal-open {
+            overflow: hidden;
+        }
+
+        /* 滚动条：滚动时显示绿色，停止3秒消失 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            background: transparent;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: transparent;
+        }
+        body.scrolling::-webkit-scrollbar-thumb {
+            background: #3A8754;
+            box-shadow: 0 0 6px #3A8754;
+        }
+        body.scrolling::-webkit-scrollbar-track {
+            background: rgba(58, 135, 84, 0.2);
+        }
+        body {
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent;
+        }
+        body.scrolling {
+            scrollbar-color: #3A8754 rgba(58, 135, 84, 0.2);
+        }
+
+        /* 固定导航栏 */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: #1A1A1Acc;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #4ADE80;
+            letter-spacing: 1px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        .nav-links li {
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 1.1rem;
+            transition: color 0.2s;
+            color: #ddd;
+        }
+        .nav-links li:hover,
+        .nav-links li.active {
+            color: #4ADE80;
+        }
+
+        /* 汉堡菜单（手机端） */
+        .hamburger {
+            display: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #4ADE80;
+            background: none;
+            border: none;
+            z-index: 101;
+        }
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 70%;
+            max-width: 280px;
+            height: 100%;
+            background: #1A1A1Aee;
+            backdrop-filter: blur(12px);
+            z-index: 200;
+            transition: right 0.3s ease;
+            padding: 5rem 2rem 2rem;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.5);
+        }
+        .mobile-menu.active {
+            right: 0;
+        }
+        .mobile-menu ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .mobile-menu li {
+            font-size: 1.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            color: #ddd;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #3A8754;
+        }
+        .mobile-menu li:hover {
+            color: #4ADE80;
+        }
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 199;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .menu-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        @media (max-width: 700px) {
+            .nav-links {
+                display: none;
+            }
+            .hamburger {
+                display: block;
+            }
+            .navbar {
+                padding: 0.8rem 1.5rem;
+            }
+            .logo {
+                font-size: 1.4rem;
+            }
+        }
+
+        /* 视图切换动画 */
+        .view {
+            display: none;
+            animation: fadeIn 0.3s ease;
+            padding-top: 80px;
+        }
+        .view.active-view {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 首页 + Canvas */
+        .home-hero {
+            min-height: calc(100vh - 80px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: #1A1A1A;
+            overflow: hidden;
+        }
+        .wave-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .home-name {
+            font-size: clamp(3rem, 12vw, 7rem);
+            font-weight: 800;
+            color: #4ADE80;
+            z-index: 2;
+            text-shadow: 0 0 25px rgba(74,222,128,0.6);
+            letter-spacing: 4px;
+            position: relative;
+        }
+
+        /* 作品集页面 */
+        .portfolio-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 0 1.5rem;
+        }
+        .portfolio-header {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            margin: 1rem 0 2rem 0;
+        }
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .filter-btn {
+            background: #2C2C2C;
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            color: #eee;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: #4ADE80;
+            color: #1A1A1A;
+        }
+
+        /* 网格布局 */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.8rem;
+            margin-bottom: 3rem;
+        }
+        @media (max-width: 1100px) {
+            .grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 700px) {
+            .grid { grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
+        }
+
+        /* 卡片 - 整体比例 3:2 (通过调整灰色区域高度) */
+        .card {
+            background-color: #424242;
+            border-radius: 30px;
+            box-shadow: 0 20px 30px -12px rgba(0,0,0,0.5);
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.25s ease, box-shadow 0.2s;
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px 8px rgba(74,222,128,0.6);
+        }
+        .card-img {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.2s;
+        }
+        .card:hover .card-img {
+            transform: scale(1.02);
+        }
+        /* 压缩灰色区域高度，使整体接近 3:2 */
+        .card-info {
+            padding: 0.5rem 0.8rem 0.7rem 0.8rem;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .card-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 0.25rem;
+        }
+        .tag {
+            font-size: 0.7rem;  /* 稍微放大一点点 */
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            background: #2c2c2c;
+            color: white;
+        }
+        .card-date {
+            position: absolute;
+            bottom: 0.5rem;
+            right: 0.8rem;
+            font-size: 0.7rem;
+            color: #aaa;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        /* 右下角装饰大字 */
+        .big-signature {
+            position: relative;
+            text-align: right;
+            font-size: clamp(2rem, 8vw, 5rem);
+            font-weight: 900;
+            color: #151515;
+            user-select: none;
+            pointer-events: none;
+            margin-top: -2rem;
+            margin-bottom: 1rem;
+            opacity: 0.7;
+            font-family: monospace;
+            letter-spacing: 4px;
+            z-index: 1;
+        }
+        .portfolio-container + .big-signature,
+        .about-container + .big-signature {
+            margin-top: 1rem;
+        }
+
+        /* 关于页 */
+        .about-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: #2a2a2a;
+            border-radius: 30px;
+            position: relative;
+            z-index: 2;
+        }
+        .contact-line {
+            margin: 1.5rem 0;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .contact-line i {
+            width: 32px;
+            color: #4ADE80;
+        }
+        hr {
+            margin: 1rem 0;
+            border-color: #4ADE80;
+        }
+
+        /* 模态框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0.2s, opacity 0.2s;
+        }
+        .modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .modal-card {
+            background: #2C2C2C;
+            border-radius: 30px;
+            width: 90%;
+            max-width: 1300px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 30px 40px rgba(0,0,0,0.6);
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .modal-card::-webkit-scrollbar { display: none; }
+        @media (min-width: 1024px) {
+            .modal-card { aspect-ratio: 16/9; max-height: 85vh; }
+        }
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .modal-card { aspect-ratio: 4/3; width: 85%; }
+        }
+        @media (max-width: 767px) {
+            .modal-card { aspect-ratio: 9/16; width: 92%; margin: 1rem auto; }
+        }
+        .close-modal {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            z-index: 101;
+            color: white;
+            background: rgba(0,0,0,0.5);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .close-modal:hover { background: #4ADE80; }
+        .modal-content {
+            padding: 2rem 1.8rem 1.8rem;
+        }
+        @media (min-width: 1024px) {
+            .modal-content { padding: 1.5rem 3rem 1.8rem 3rem; }
+        }
+        @media (max-width: 767px) {
+            .modal-content { padding: 1rem 0.8rem 2rem; }
+        }
+        .work-desc { font-size: 1rem; margin-bottom: 1.5rem; line-height: 1.4; }
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 1.8rem 0 1rem 0;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .section-divider hr {
+            flex: 1;
+            border: none;
+            height: 2px;
+            background: linear-gradient(90deg, #4ADE80, #4ADE80 80%, transparent);
+        }
+        .img-grid {
+            display: grid;
+            grid-template-columns: repeat(4,1fr);
+            gap: 1rem;
+            margin-top: 0.8rem;
+        }
+        @media (max-width: 1000px) { .img-grid { grid-template-columns: repeat(3,1fr); } }
+        @media (max-width: 640px) { .img-grid { grid-template-columns: repeat(2,1fr); gap: 0.8rem; } }
+        .grid-img {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .grid-img:hover { transform: scale(1.02); opacity: 0.9; }
+
+        /* 全屏 Lightbox */
+        .lightbox {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.97);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+        }
+        .lightbox.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .lightbox-img {
+            max-width: 90vw;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+        }
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 2rem;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+        .nav-arrow {
+            pointer-events: auto;
+            font-size: 3rem;
+            color: white;
+            cursor: pointer;
+            background: rgba(0,0,0,0.5);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .thumbnails {
+            position: absolute;
+            bottom: 20px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 90%;
+            background: rgba(0,0,0,0.6);
+            padding: 10px 16px;
+            border-radius: 60px;
+        }
+        .thumb {
+            width: 60px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.1s;
+        }
+        .thumb.active-thumb { border-color: #4ADE80; transform: scale(1.05); }
+        .close-lightbox {
+            position: absolute;
+            top: 25px;
+            right: 35px;
+            font-size: 40px;
+            color: white;
+            cursor: pointer;
+            z-index: 2001;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.8rem;
+            color: #aaa;
+            border-top: 1px solid #2a2a2a;
+            margin-top: 2rem;
+            position: relative;
+            z-index: 2;
+            background-color: #1A1A1A;
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <nav class="navbar">
+        <div class="logo">KOITOHANA</div>
+        <ul class="nav-links">
+            <li data-view="home">首页</li>
+            <li data-view="portfolio">作品集</li>
+            <li data-view="about">关于</li>
+        </ul>
+        <button class="hamburger" id="hamburgerBtn"><i class="fas fa-bars"></i></button>
+    </nav>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <ul>
+            <li data-view="home">首页</li>
+            <li data-view="portfolio">作品集</li>
+            <li data-view="about">关于</li>
+        </ul>
+    </div>
+    <div class="menu-overlay" id="menuOverlay"></div>
+
+    <div id="homeView" class="view">
+        <div class="home-hero" id="homeHero">
+            <canvas id="waveCanvas" class="wave-canvas"></canvas>
+            <div class="home-name">KOITOHANA</div>
+        </div>
+    </div>
+
+    <div id="portfolioView" class="view">
+        <div class="portfolio-container">
+            <div class="portfolio-header"><div class="filter-group" id="filterGroup"></div></div>
+            <div id="portfolioGrid" class="grid"></div>
+        </div>
+        <div class="big-signature">KOITOHANA</div>
+    </div>
+
+    <div id="aboutView" class="view">
+        <div class="about-container">
+            <h2 style="color:#4ADE80;">KOITOHANA</h2>
+            <p>三维建模 / 硬表面 / 写实渲染</p>
+            <hr>
+            <div class="contact-line"><i class="fab fa-weixin"></i> 微信号：koito_3d (仅编辑可见)</div>
+            <div class="contact-line"><i class="fab fa-qq"></i> QQ：34271890</div>
+            <div class="contact-line"><i class="fas fa-phone-alt"></i> 手机：+86 130 0000 1234</div>
+            <div class="contact-line"><i class="fas fa-envelope"></i> 邮箱：koito@hana.art</div>
+            <hr>
+            <p>资深三维艺术家，擅长高精度模型与PBR全流程。</p>
+        </div>
+        <div class="big-signature">KOITOHANA</div>
+    </div>
+
+    <footer>© 2026 KoitoHana All Rights Reserved</footer>
+</div>
+
+<div id="detailModal" class="modal-overlay"><div class="modal-card"><span class="close-modal">&times;</span><div id="modalDynamicContent" class="modal-content"></div></div></div>
+<div id="lightbox" class="lightbox"><span class="close-lightbox">&times;</span><img class="lightbox-img" alt="放大预览"><div class="lightbox-nav"><div class="nav-arrow left"><i class="fas fa-chevron-left"></i></div><div class="nav-arrow right"><i class="fas fa-chevron-right"></i></div></div><div class="thumbnails" id="lightboxThumbs"></div></div>
+
+<script>
+    // 作品数据（含完成时间）
+    const worksData = [
+        {
+            id: "katana",
+            title: "武士刀",
+            tags: ["武器", "道具"],
+            cover: "https://picsum.photos/id/104/400/225",
+            description: "高精度日本刀模型，四边面布线，金属磨损材质，八猴渲染。",
+            renders: ["https://picsum.photos/id/105/800/450", "https://picsum.photos/id/106/800/450"],
+            models: ["https://picsum.photos/id/107/800/450", "https://picsum.photos/id/108/800/450"],
+            refs: ["https://picsum.photos/id/109/800/450"],
+            date: "2026.03"
+        },
+        {
+            id: "tti2011",
+            title: "TTI2011",
+            tags: ["武器", "硬表面"],
+            cover: "https://picsum.photos/id/110/400/225",
+            description: "战斗手枪高模，全硬表面拓扑，PBR流程，SP绘制，Marmoset展示。",
+            renders: ["https://picsum.photos/id/111/800/450", "https://picsum.photos/id/112/800/450"],
+            models: ["https://picsum.photos/id/113/800/450", "https://picsum.photos/id/114/800/450"],
+            refs: ["https://picsum.photos/id/115/800/450", "https://picsum.photos/id/116/800/450"],
+            date: "2026.04"
+        },
+        {
+            id: "bloodvial",
+            title: "血瓶",
+            tags: ["道具", "场景"],
+            cover: "https://picsum.photos/id/117/400/225",
+            description: "魔幻血瓶，玻璃+液体材质，低面数但细节丰富，实时渲染。",
+            renders: ["https://picsum.photos/id/118/800/450", "https://picsum.photos/id/119/800/450"],
+            models: ["https://picsum.photos/id/120/800/450"],
+            refs: ["https://picsum.photos/id/121/800/450", "https://picsum.photos/id/122/800/450"],
+            date: "2026.05"
+        }
+    ];
+
+    const tagColorMap = {
+        "武器": "#b85c1a",
+        "道具": "#5d6b7a",
+        "角色": "#9b59b6",
+        "场景": "#2e86c1",
+        "环境": "#1e8449",
+        "硬表面": "#7f8c8d"
+    };
+
+    let activeFilter = "全部";
+    let currentLightboxImages = [];
+    let currentLightboxIndex = 0;
+    let scrollTimeout = null;
+
+    // 滚动条自动消失
+    function handleScroll() {
+        document.body.classList.add('scrolling');
+        if (scrollTimeout) clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            document.body.classList.remove('scrolling');
+        }, 3000);
+    }
+    window.addEventListener('scroll', handleScroll);
+
+    function applyTagColors() {
+        for (const [tag, color] of Object.entries(tagColorMap)) {
+            const style = document.createElement('style');
+            style.textContent = `.tag[data-tag="${tag}"] { background: ${color} !important; }`;
+            document.head.appendChild(style);
+        }
+    }
+
+    function renderFilterButtons() {
+        const allTags = ["全部", ...new Set(worksData.flatMap(w => w.tags))];
+        const html = allTags.map(tag => `<button class="filter-btn ${activeFilter === tag ? 'active' : ''}" data-filter="${tag}">${tag}</button>`).join('');
+        document.getElementById("filterGroup").innerHTML = html;
+        document.querySelectorAll(".filter-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                activeFilter = btn.dataset.filter;
+                renderFilterButtons();
+                renderPortfolio();
+            });
+        });
+    }
+
+    function renderPortfolio() {
+        const filtered = activeFilter === "全部" ? worksData : worksData.filter(w => w.tags.includes(activeFilter));
+        const gridHtml = filtered.map(work => `
+            <div class="card" data-id="${work.id}">
+                <img class="card-img" src="${work.cover}" loading="lazy">
+                <div class="card-info">
+                    <div class="card-title">${work.title}</div>
+                    <div class="tags">${work.tags.map(t => `<span class="tag" data-tag="${t}">${t}</span>`).join('')}</div>
+                    <div class="card-date">${work.date || ""}</div>
+                </div>
+            </div>
+        `).join('');
+        document.getElementById("portfolioGrid").innerHTML = gridHtml;
+        document.querySelectorAll(".card").forEach(card => {
+            card.addEventListener("click", () => {
+                const work = worksData.find(w => w.id === card.dataset.id);
+                if (work) openModal(work);
+            });
+        });
+    }
+
+    function openModal(work) {
+        const modal = document.getElementById("detailModal");
+        const contentDiv = document.getElementById("modalDynamicContent");
+        const renderImgs = (work.renders || []).map(url => `<img class="grid-img" src="${url}">`).join('');
+        const modelImgs = (work.models || []).map(url => `<img class="grid-img" src="${url}">`).join('');
+        const refImgs = (work.refs || []).map(url => `<img class="grid-img" src="${url}">`).join('');
+        const html = `
+            <div class="work-desc">${work.description}</div>
+            <div class="section-divider">渲染 <hr></div><div class="img-grid">${renderImgs || "<span>暂无图片</span>"}</div>
+            <div class="section-divider">模型/布线 <hr></div><div class="img-grid">${modelImgs || "<span>暂无图片</span>"}</div>
+            <div class="section-divider">参考图 <hr></div><div class="img-grid">${refImgs || "<span>暂无图片</span>"}</div>
+        `;
+        contentDiv.innerHTML = html;
+        document.body.classList.add("modal-open");
+        modal.classList.add("active");
+        const allImgs = contentDiv.querySelectorAll(".grid-img");
+        allImgs.forEach(img => {
+            img.addEventListener("click", () => {
+                const imagesList = [...(work.renders || []), ...(work.models || []), ...(work.refs || [])];
+                currentLightboxImages = imagesList;
+                const idx = imagesList.findIndex(src => src === img.src);
+                openLightbox(idx >= 0 ? idx : 0);
+            });
+        });
+    }
+
+    function closeModal() {
+        document.getElementById("detailModal").classList.remove("active");
+        document.body.classList.remove("modal-open");
+    }
+
+    function openLightbox(index) {
+        if (!currentLightboxImages.length) return;
+        currentLightboxIndex = index;
+        const lb = document.getElementById("lightbox");
+        lb.classList.add("active");
+        updateLightboxImage();
+        renderThumbnails();
+        document.body.classList.add("modal-open");
+    }
+
+    function updateLightboxImage() {
+        document.querySelector(".lightbox-img").src = currentLightboxImages[currentLightboxIndex];
+        renderThumbnails();
+    }
+
+    function renderThumbnails() {
+        const container = document.getElementById("lightboxThumbs");
+        container.innerHTML = currentLightboxImages.map((img, i) => `
+            <img class="thumb ${i === currentLightboxIndex ? 'active-thumb' : ''}" src="${img}" data-index="${i}">
+        `).join('');
+        document.querySelectorAll(".thumb").forEach(thumb => {
+            thumb.addEventListener("click", () => {
+                currentLightboxIndex = parseInt(thumb.dataset.index);
+                updateLightboxImage();
+            });
+        });
+    }
+
+    function closeLightbox() {
+        document.getElementById("lightbox").classList.remove("active");
+        document.body.classList.remove("modal-open");
+    }
+
+    function nextImage() {
+        currentLightboxIndex = (currentLightboxIndex + 1) % currentLightboxImages.length;
+        updateLightboxImage();
+    }
+
+    function prevImage() {
+        currentLightboxIndex = (currentLightboxIndex - 1 + currentLightboxImages.length) % currentLightboxImages.length;
+        updateLightboxImage();
+    }
+
+    // 事件绑定
+    document.querySelectorAll(".close-modal").forEach(btn => btn.addEventListener("click", closeModal));
+    document.getElementById("detailModal").addEventListener("click", e => { if (e.target === document.getElementById("detailModal")) closeModal(); });
+    document.querySelector(".close-lightbox").addEventListener("click", closeLightbox);
+    document.querySelector(".lightbox-nav .left").addEventListener("click", prevImage);
+    document.querySelector(".lightbox-nav .right").addEventListener("click", nextImage);
+    let touchStartX = 0;
+    document.getElementById("lightbox").addEventListener("touchstart", e => { touchStartX = e.changedTouches[0].screenX; });
+    document.getElementById("lightbox").addEventListener("touchend", e => {
+        const endX = e.changedTouches[0].screenX;
+        if (endX + 50 < touchStartX) nextImage();
+        if (endX - 50 > touchStartX) prevImage();
+    });
+
+    // 导航切换
+    function switchToView(viewId) {
+        document.querySelectorAll(".view").forEach(v => v.classList.remove("active-view"));
+        document.getElementById(`${viewId}View`).classList.add("active-view");
+        if (viewId === "home") {
+            document.querySelectorAll(".big-signature").forEach(s => s.style.display = "none");
+        } else {
+            document.querySelectorAll(".big-signature").forEach(s => s.style.display = "block");
+        }
+        if (viewId === "portfolio") renderPortfolio();
+        onViewChange(viewId);
+        closeMobileMenu();
+    }
+
+    // 移动端菜单
+    const hamburger = document.getElementById('hamburgerBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const menuOverlay = document.getElementById('menuOverlay');
+    function openMobileMenu() {
+        mobileMenu.classList.add('active');
+        menuOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeMobileMenu() {
+        mobileMenu.classList.remove('active');
+        menuOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    if (hamburger) {
+        hamburger.addEventListener('click', openMobileMenu);
+    }
+    menuOverlay.addEventListener('click', closeMobileMenu);
+    document.querySelectorAll('#mobileMenu li').forEach(li => {
+        li.addEventListener('click', () => {
+            const view = li.dataset.view;
+            if (view) switchToView(view);
+        });
+    });
+
+    document.querySelectorAll(".nav-links li").forEach(li => {
+        li.addEventListener("click", () => {
+            const view = li.dataset.view;
+            switchToView(view);
+        });
+    });
+
+    // 正弦波流光动画
+    const canvas = document.getElementById('waveCanvas');
+    let ctx = canvas.getContext('2d');
+    let width, height, animationId = null;
+    let time = 0;
+    const WAVE_COUNT = 4;
+    const COLORS = ['#4ADE80', '#6EE7B0', '#3A8754', '#86EFAC'];
+    let waves = [];
+
+    function initWaves() {
+        waves = [];
+        const baseYStart = 0.55;
+        const baseYRange = 0.20;
+        for (let i = 0; i < WAVE_COUNT; i++) {
+            waves.push({
+                amplitude: 18 + Math.random() * 25,
+                frequency: 0.006 + Math.random() * 0.006,
+                speed: 0.30 + Math.random() * 0.20,
+                phaseOffset: Math.random() * Math.PI * 2,
+                baseY: baseYStart + (i / (WAVE_COUNT - 1)) * baseYRange,
+                color: COLORS[i % COLORS.length],
+                lineWidth: 2.2 + Math.random() * 1.5,
+            });
+        }
+    }
+
+    function resizeCanvas() {
+        const hero = document.getElementById('homeHero');
+        if (!hero) return;
+        width = hero.clientWidth;
+        height = hero.clientHeight;
+        canvas.width = width;
+        canvas.height = height;
+        drawWaves();
+    }
+
+    function drawWaves() {
+        if (!ctx || width === 0 || height === 0) return;
+        ctx.clearRect(0, 0, width, height);
+        for (let w of waves) {
+            const step = width / 250;
+            ctx.beginPath();
+            ctx.lineWidth = w.lineWidth;
+            ctx.strokeStyle = w.color;
+            ctx.shadowBlur = 24;
+            ctx.shadowColor = w.color;
+            let first = true;
+            for (let x = 0; x <= width; x += step) {
+                const angle = w.frequency * x + time * w.speed + w.phaseOffset;
+                const offsetY = Math.sin(angle) * w.amplitude;
+                const y = w.baseY * height + offsetY;
+                if (first) { ctx.moveTo(x, y); first = false; }
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.lineWidth = w.lineWidth * 0.7;
+            ctx.strokeStyle = w.color + 'cc';
+            ctx.shadowBlur = 32;
+            first = true;
+            for (let x = 0; x <= width; x += step) {
+                const angle = w.frequency * x + time * w.speed + w.phaseOffset;
+                const offsetY = Math.sin(angle) * w.amplitude;
+                const y = w.baseY * height + offsetY;
+                if (first) { ctx.moveTo(x, y); first = false; }
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+        }
+        ctx.shadowBlur = 0;
+    }
+
+    function animateWaves() {
+        if (!canvas.isConnected) return;
+        time += 0.022;
+        drawWaves();
+        animationId = requestAnimationFrame(animateWaves);
+    }
+
+    function startWaveAnimation() {
+        if (animationId) cancelAnimationFrame(animationId);
+        initWaves();
+        resizeCanvas();
+        animateWaves();
+    }
+
+    function onViewChange(viewId) {
+        if (viewId === 'home') {
+            if (!animationId) startWaveAnimation();
+            else resizeCanvas();
+        } else {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+                if (ctx) ctx.clearRect(0, 0, width, height);
+            }
+        }
+    }
+
+    window.addEventListener('load', () => {
+        applyTagColors();
+        renderFilterButtons();
+        renderPortfolio();
+        switchToView('home');
+        startWaveAnimation();
+        window.addEventListener('resize', () => {
+            if (document.getElementById('homeView').classList.contains('active-view')) resizeCanvas();
+        });
+    });
+</script>
+</body>
+</html>
