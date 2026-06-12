@@ -286,11 +286,13 @@
         .card:hover .card-img {
             transform: scale(1.02);
         }
-        /* 压缩灰色区域高度，使整体接近 3:2 */
+        /* 调整卡片信息区为弹性列布局，让日期不重叠 */
         .card-info {
             padding: 0.5rem 0.8rem 0.7rem 0.8rem;
             position: relative;
             flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
         }
         .card-title {
             font-weight: 700;
@@ -310,14 +312,14 @@
             background: #2c2c2c;
             color: white;
         }
+        /* 日期样式微调：取消绝对定位，使用外边距，确保在标签下方 */
         .card-date {
-            position: absolute;
-            bottom: 0.5rem;
-            right: 0.8rem;
             font-size: 0.7rem;
             color: #aaa;
             font-weight: 400;
             letter-spacing: 0.5px;
+            margin-top: 0.25rem;
+            text-align: right;
         }
 
         /* 右下角装饰大字 */
@@ -603,10 +605,10 @@
             <h2 style="color:#4ADE80;">KOITOHANA</h2>
             <p>三维建模 / 硬表面 / 写实渲染</p>
             <hr>
-            <div class="contact-line"><i class="fab fa-weixin"></i> 微信号：koito_3d (仅编辑可见)</div>
-            <div class="contact-line"><i class="fab fa-qq"></i> QQ：34271890</div>
-            <div class="contact-line"><i class="fas fa-phone-alt"></i> 手机：+86 130 0000 1234</div>
-            <div class="contact-line"><i class="fas fa-envelope"></i> 邮箱：koito@hana.art</div>
+            <div class="contact-line"><i class="fab fa-weixin"></i> 微信号：qq1823248772</div>
+            <div class="contact-line"><i class="fab fa-qq"></i> QQ号：1823248772</div>
+            <div class="contact-line"><i class="fas fa-phone-alt"></i> 手机：15326406710 / 15804065791</div>
+            <div class="contact-line"><i class="fas fa-envelope"></i> 邮箱：1823248772@qq.com</div>
             <hr>
             <p>资深三维艺术家，擅长高精度模型与PBR全流程。</p>
         </div>
@@ -620,39 +622,72 @@
 <div id="lightbox" class="lightbox"><span class="close-lightbox">&times;</span><img class="lightbox-img" alt="放大预览"><div class="lightbox-nav"><div class="nav-arrow left"><i class="fas fa-chevron-left"></i></div><div class="nav-arrow right"><i class="fas fa-chevron-right"></i></div></div><div class="thumbnails" id="lightboxThumbs"></div></div>
 
 <script>
-    // 作品数据（含完成时间）
+    // ======================== 作品数据（完整版，已替换所有图片链接） ========================
     const worksData = [
         {
             id: "katana",
             title: "武士刀",
             tags: ["武器", "道具"],
-            cover: "https://picsum.photos/id/104/400/225",
+            cover: "https://s41.ax1x.com/2026/06/11/pmK7eij.png",
             description: "高精度日本刀模型，四边面布线，金属磨损材质，八猴渲染。",
-            renders: ["https://picsum.photos/id/105/800/450", "https://picsum.photos/id/106/800/450"],
-            models: ["https://picsum.photos/id/107/800/450", "https://picsum.photos/id/108/800/450"],
-            refs: ["https://picsum.photos/id/109/800/450"],
+            renders: [
+                "https://s41.ax1x.com/2026/06/11/pmK7VoQ.png",
+                "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEVY6hqK6qlS9qMlDZWRBK9FWzKHluL7gACcB4AAkkrWFUZ3LwvXk__PDwE.jpg",
+                "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEVY6lqK6rAFMVpj-Doq62zhXtzWhJngAACcR4AAkkrWFXeAQiL8PzZdTwE.jpg",
+                "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEVY6pqK6rQ1JYlLvDa-6yLWcM8IU1_SQACch4AAkkrWFWyESkE78ewQTwE.jpg",
+                "https://s41.ax1x.com/2026/06/11/pmK7isf.png",
+                "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEVY7xqK6tIfBAGAAGPKejhXGMD2xp330IAAoQeAAJJK1hV1J0AAU1VsJTFPAQ.jpg",
+                "https://s41.ax1x.com/2026/06/11/pmK7Edg.png",
+                "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEVY8FqK6tpE8Cttpq2m9qW68YTqw75ngACiR4AAkkrWFUc0lIKC0d7ujwE.jpg"
+            ],
+            models: [
+                "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEVY8VqK6uGOk_HAc8M34bLjdd4XjbCjwACjR4AAkkrWFXy0YwTwaWD4zwE.jpg"
+            ],
+            refs: [
+                "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEVY3pqK6liWD0Ynda5RYJ1FmxStGc1LQACQB4AAkkrWFWF7EP5jwpPETwE.jpg"
+            ],
             date: "2026.03"
         },
         {
             id: "tti2011",
             title: "TTI2011",
             tags: ["武器", "硬表面"],
-            cover: "https://picsum.photos/id/110/400/225",
+            cover: "https://s41.ax1x.com/2026/06/12/pmMKb4O.png",
             description: "战斗手枪高模，全硬表面拓扑，PBR流程，SP绘制，Marmoset展示。",
-            renders: ["https://picsum.photos/id/111/800/450", "https://picsum.photos/id/112/800/450"],
-            models: ["https://picsum.photos/id/113/800/450", "https://picsum.photos/id/114/800/450"],
-            refs: ["https://picsum.photos/id/115/800/450", "https://picsum.photos/id/116/800/450"],
+            renders: [
+                "https://s41.ax1x.com/2026/06/12/pmMK7E6.png",
+                "https://s41.ax1x.com/2026/06/12/pmMKoHx.png",
+                "https://s41.ax1x.com/2026/06/12/pmMKXgH.png",
+                "https://s41.ax1x.com/2026/06/12/pmMKLCD.png"
+            ],
+            models: [
+                "https://s41.ax1x.com/2026/06/12/pmMKID1.jpg",
+                "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEVY6BqK6plQhRBwguvt6yFLtsHVBORTwACaB4AAkkrWFUo_rYfDZXJ1DwE.jpg"
+            ],
+            refs: [
+                "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEVY3NqK6kr6J_4XwGkUd9uVB0r05NzKgACOB4AAkkrWFU7qDwSutaYGTwE.jpg",
+                "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEVY39qK6mD5GFsUczmzfgVGFQywSkNdAACRx4AAkkrWFU8Oa8LsOUbtzwE.jpg",
+                "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEVY4hqK6m9-s6FOL9UEAfUNvBHZ5-KKgACUB4AAkkrWFXikgh_6Ah6vjwE.jpg"
+            ],
             date: "2026.04"
         },
         {
             id: "bloodvial",
             title: "血瓶",
             tags: ["道具", "场景"],
-            cover: "https://picsum.photos/id/117/400/225",
+            cover: "https://s41.ax1x.com/2026/06/12/pmMKO8e.png",
             description: "魔幻血瓶，玻璃+液体材质，低面数但细节丰富，实时渲染。",
-            renders: ["https://picsum.photos/id/118/800/450", "https://picsum.photos/id/119/800/450"],
-            models: ["https://picsum.photos/id/120/800/450"],
-            refs: ["https://picsum.photos/id/121/800/450", "https://picsum.photos/id/122/800/450"],
+            renders: [
+                "https://s41.ax1x.com/2026/06/12/pmMKO8e.png",
+                "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEVY9RqK6voRAE1R97O4kIn_I0PwznbrAACnB4AAkkrWFV4b9GwzFB7JzwE.jpg"
+            ],
+            models: [
+                "https://s41.ax1x.com/2026/06/12/pmMKHUK.jpg",
+                "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEVY9ZqK6v29XX0qNAtGzNsf8XCplMkegACnh4AAkkrWFVnJs5XeQwx6zwE.jpg"
+            ],
+            refs: [
+                "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEVY9FqK6u2dPIPmaLL9AvGaBm1x7KhrQACmR4AAkkrWFX-xAj1AwU-wTwE.jpg"
+            ],
             date: "2026.05"
         }
     ];
