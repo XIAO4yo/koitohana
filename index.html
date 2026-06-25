@@ -3,31 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>KoitoHana Portfolio</title>
+    <title>KOITOHANA · 三维建模与渲染作品集</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* ===== 全局变量 ===== */
+        :root {
+            --theme-color: #aaa7ff;
+            --theme-light: #c8c5ff;
+            --theme-dark: #8a87d9;
+            --theme-glow: rgba(170, 167, 255, 0.6);
+            --theme-border: #aaa7ff;
+        }
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
-
+        /* ===== 全局渐变背景（所有页面共享） ===== */
         body {
-            background-color: #1A1A1A;
+            background: linear-gradient(180deg, #2C2C2C 0%, #1A1A1A 100%);
             font-family: 'Inter', system-ui, sans-serif;
             color: #ffffff;
-            line-height: 1.5;
             overflow-x: hidden;
             overflow-y: auto;
+            min-height: 100vh;
+            background-attachment: fixed;
         }
-
         body.modal-open {
             overflow: hidden;
         }
 
-        /* 滚动条：滚动时显示绿色，停止3秒消失 */
+        /* ===== 首页专属 Canvas（覆盖在渐变之上） ===== */
+        #homeBgCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            display: block;
+        }
+
+        .app {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 滚动条 */
         ::-webkit-scrollbar {
             width: 8px;
             background: transparent;
@@ -39,21 +67,21 @@
             background: transparent;
         }
         body.scrolling::-webkit-scrollbar-thumb {
-            background: #3A8754;
-            box-shadow: 0 0 6px #3A8754;
+            background: var(--theme-color);
+            box-shadow: 0 0 6px var(--theme-color);
         }
         body.scrolling::-webkit-scrollbar-track {
-            background: rgba(58, 135, 84, 0.2);
+            background: rgba(170, 167, 255, 0.2);
         }
         body {
             scrollbar-width: thin;
             scrollbar-color: transparent transparent;
         }
         body.scrolling {
-            scrollbar-color: #3A8754 rgba(58, 135, 84, 0.2);
+            scrollbar-color: var(--theme-color) rgba(170, 167, 255, 0.2);
         }
 
-        /* 固定导航栏 */
+        /* ===== 导航栏 ===== */
         .navbar {
             position: fixed;
             top: 0;
@@ -63,16 +91,36 @@
             justify-content: space-between;
             align-items: center;
             padding: 1rem 2rem;
-            background: #1A1A1Acc;
-            backdrop-filter: blur(10px);
+            background: rgba(55, 55, 55, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             z-index: 100;
             box-shadow: 0 2px 10px rgba(0,0,0,0.3);
         }
-        .logo {
+        .logo-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .logo-wrapper svg {
+            width: 28px;
+            height: 28px;
+            color: var(--theme-color);
+            transition: color 0.3s;
+            flex-shrink: 0;
+        }
+        .logo-wrapper .logo-text {
             font-size: 1.8rem;
             font-weight: 700;
-            color: #4ADE80;
+            color: var(--theme-color);
             letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+        .logo-wrapper:hover svg,
+        .logo-wrapper:hover .logo-text {
+            color: #ffffff;
         }
         .nav-links {
             display: flex;
@@ -88,15 +136,15 @@
         }
         .nav-links li:hover,
         .nav-links li.active {
-            color: #4ADE80;
+            color: var(--theme-color);
         }
 
-        /* 汉堡菜单（手机端） */
+        /* 汉堡菜单 */
         .hamburger {
             display: none;
             font-size: 1.8rem;
             cursor: pointer;
-            color: #4ADE80;
+            color: var(--theme-color);
             background: none;
             border: none;
             z-index: 101;
@@ -108,7 +156,7 @@
             width: 70%;
             max-width: 280px;
             height: 100%;
-            background: #1A1A1Aee;
+            background: rgba(26, 26, 26, 0.95);
             backdrop-filter: blur(12px);
             z-index: 200;
             transition: right 0.3s ease;
@@ -130,10 +178,10 @@
             cursor: pointer;
             color: #ddd;
             padding: 0.5rem 0;
-            border-bottom: 1px solid #3A8754;
+            border-bottom: 1px solid var(--theme-color);
         }
         .mobile-menu li:hover {
-            color: #4ADE80;
+            color: var(--theme-color);
         }
         .menu-overlay {
             position: fixed;
@@ -151,7 +199,6 @@
             visibility: visible;
             opacity: 1;
         }
-
         @media (max-width: 700px) {
             .nav-links {
                 display: none;
@@ -162,16 +209,21 @@
             .navbar {
                 padding: 0.8rem 1.5rem;
             }
-            .logo {
+            .logo-wrapper .logo-text {
                 font-size: 1.4rem;
+            }
+            .logo-wrapper svg {
+                width: 24px;
+                height: 24px;
             }
         }
 
-        /* 视图切换动画 */
+        /* ===== 视图切换 ===== */
         .view {
             display: none;
             animation: fadeIn 0.3s ease;
             padding-top: 80px;
+            flex: 1;
         }
         .view.active-view {
             display: block;
@@ -181,36 +233,26 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* 首页 + Canvas */
+        /* ===== 首页（相对定位，承载 Canvas） ===== */
         .home-hero {
             min-height: calc(100vh - 80px);
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            background: #1A1A1A;
             overflow: hidden;
-        }
-        .wave-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
         }
         .home-name {
             font-size: clamp(3rem, 12vw, 7rem);
             font-weight: 800;
-            color: #4ADE80;
+            color: var(--theme-color);
             z-index: 2;
-            text-shadow: 0 0 25px rgba(74,222,128,0.6);
+            text-shadow: 0 0 25px var(--theme-glow);
             letter-spacing: 4px;
             position: relative;
         }
 
-        /* 作品集页面 */
+        /* ===== 作品集 ===== */
         .portfolio-container {
             max-width: 1400px;
             margin: 0 auto;
@@ -229,7 +271,8 @@
             gap: 0.75rem;
         }
         .filter-btn {
-            background: #2C2C2C;
+            background: rgba(44, 44, 44, 0.7);
+            backdrop-filter: blur(4px);
             border: none;
             padding: 0.5rem 1.2rem;
             border-radius: 40px;
@@ -241,11 +284,10 @@
         }
         .filter-btn.active,
         .filter-btn:hover {
-            background: #4ADE80;
+            background: var(--theme-color);
             color: #1A1A1A;
         }
 
-        /* 网格布局 */
         .grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -259,9 +301,10 @@
             .grid { grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
         }
 
-        /* 卡片 - 整体比例 3:2 */
+        /* ===== 卡片（统一投影） ===== */
         .card {
-            background-color: #424242;
+            background-color: rgba(66, 66, 66, 0.85);
+            backdrop-filter: blur(4px);
             border-radius: 30px;
             box-shadow: 0 20px 30px -12px rgba(0,0,0,0.5);
             overflow: hidden;
@@ -274,7 +317,7 @@
         }
         .card:hover {
             transform: scale(1.02);
-            box-shadow: 0 0 20px 8px rgba(74,222,128,0.6);
+            box-shadow: 0 0 20px 8px var(--theme-glow);
         }
         .card-img {
             width: 100%;
@@ -286,15 +329,12 @@
         .card:hover .card-img {
             transform: scale(1.02);
         }
-        /* 调整卡片信息区：标题和日期在同一行（flex） */
         .card-info {
             padding: 0.5rem 0.8rem 0.7rem 0.8rem;
-            position: relative;
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
         }
-        /* 标题行：左标题 右日期 */
         .card-title-row {
             display: flex;
             justify-content: space-between;
@@ -324,36 +364,22 @@
             background: #2c2c2c;
             color: white;
         }
+        .tag[data-tag="武器"] { background: #b85c1a; }
+        .tag[data-tag="道具"] { background: #5d6b7a; }
+        .tag[data-tag="角色"] { background: #9b59b6; }
+        .tag[data-tag="场景"] { background: #2e86c1; }
+        .tag[data-tag="环境"] { background: #1e8449; }
+        .tag[data-tag="硬表面"] { background: #7f8c8d; }
 
-        /* 右下角装饰大字 */
-        .big-signature {
-            position: relative;
-            text-align: right;
-            font-size: clamp(2rem, 8vw, 5rem);
-            font-weight: 900;
-            color: #151515;
-            user-select: none;
-            pointer-events: none;
-            margin-top: -2rem;
-            margin-bottom: 1rem;
-            opacity: 0.7;
-            font-family: monospace;
-            letter-spacing: 4px;
-            z-index: 1;
-        }
-        .portfolio-container + .big-signature,
-        .about-container + .big-signature,
-        .contact-container + .big-signature {
-            margin-top: 1rem;
-        }
-
-        /* 关于页 & 联系方式页 公用容器样式 */
+        /* ===== 关于 & 联系方式（添加投影） ===== */
         .about-container, .contact-container {
             max-width: 800px;
             margin: 2rem auto;
             padding: 2rem;
-            background: #2a2a2a;
+            background: rgba(42, 42, 42, 0.85);
+            backdrop-filter: blur(4px);
             border-radius: 30px;
+            box-shadow: 0 20px 30px -12px rgba(0,0,0,0.5);
             position: relative;
             z-index: 2;
         }
@@ -367,13 +393,12 @@
         }
         .contact-line i {
             width: 32px;
-            color: #4ADE80;
+            color: var(--theme-color);
         }
         hr {
             margin: 1rem 0;
-            border-color: #4ADE80;
+            border-color: var(--theme-color);
         }
-        /* 关于页文本样式 */
         .about-text {
             line-height: 1.8;
             margin-top: 1rem;
@@ -384,17 +409,17 @@
         .name-highlight {
             font-size: 1.8rem;
             font-weight: 700;
-            color: #4ADE80;
+            color: var(--theme-color);
             margin-bottom: 0.5rem;
         }
         .subtitle {
             color: #aaa;
             margin-bottom: 1.5rem;
-            border-left: 3px solid #4ADE80;
+            border-left: 3px solid var(--theme-color);
             padding-left: 1rem;
         }
 
-        /* 模态框 */
+        /* ===== 模态框 ===== */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -413,7 +438,8 @@
             opacity: 1;
         }
         .modal-card {
-            background: #2C2C2C;
+            background: rgba(44, 44, 44, 0.95);
+            backdrop-filter: blur(8px);
             border-radius: 30px;
             width: 90%;
             max-width: 1300px;
@@ -451,7 +477,7 @@
             justify-content: center;
             transition: 0.2s;
         }
-        .close-modal:hover { background: #4ADE80; }
+        .close-modal:hover { background: var(--theme-color); }
         .modal-content {
             padding: 2rem 1.8rem 1.8rem;
         }
@@ -474,7 +500,7 @@
             flex: 1;
             border: none;
             height: 2px;
-            background: linear-gradient(90deg, #4ADE80, #4ADE80 80%, transparent);
+            background: linear-gradient(90deg, var(--theme-color), var(--theme-color) 80%, transparent);
         }
         .img-grid {
             display: grid;
@@ -564,7 +590,7 @@
             border: 2px solid transparent;
             transition: 0.1s;
         }
-        .thumb.active-thumb { border-color: #4ADE80; transform: scale(1.05); }
+        .thumb.active-thumb { border-color: var(--theme-color); transform: scale(1.05); }
         .close-lightbox {
             position: absolute;
             top: 25px;
@@ -580,18 +606,163 @@
             padding: 2rem;
             font-size: 0.8rem;
             color: #aaa;
-            border-top: 1px solid #2a2a2a;
+            border-top: 1px solid rgba(42, 42, 42, 0.5);
             margin-top: 2rem;
             position: relative;
             z-index: 2;
-            background-color: #1A1A1A;
+            background-color: transparent;
+        }
+
+        /* ===== 调色板卡片 ===== */
+        .color-picker-card {
+            position: fixed;
+            top: 80px;
+            right: 25px;
+            z-index: 500;
+            background: rgba(42, 42, 42, 0.95);
+            backdrop-filter: blur(16px);
+            border-radius: 20px;
+            padding: 20px 22px 22px 22px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.8);
+            border: 0.5px solid rgba(255,255,255,0.08);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            min-width: 220px;
+        }
+        .color-picker-card.open { display: flex; }
+        .color-picker-card .pick-label {
+            color: #bbb;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 400;
+        }
+        .color-picker-card .preview-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+        .color-picker-card .preview-box {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: var(--theme-color);
+            flex-shrink: 0;
+        }
+        .color-picker-card .hex-input {
+            background: #1f1f1f;
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            padding: 6px 10px;
+            color: #eee;
+            font-size: 0.85rem;
+            width: 100px;
+            font-family: monospace;
+            outline: none;
+        }
+        .color-picker-card .hex-input:focus {
+            border-color: var(--theme-color);
+        }
+        .color-picker-card .picker-area {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            width: 100%;
+        }
+        .color-picker-card .sat-val-canvas {
+            width: 180px;
+            height: 180px;
+            border-radius: 12px;
+            cursor: crosshair;
+            border: 1px solid #3a3a3a;
+            flex-shrink: 0;
+        }
+        .color-picker-card .hue-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 180px;
+            height: 16px;
+            background: linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000);
+            border-radius: 12px;
+            border: 1px solid #3a3a3a;
+            cursor: pointer;
+            outline: none;
+            transform: rotate(90deg);
+            transform-origin: center;
+            width: 180px;
+            margin: 30px 0;
+        }
+        .color-picker-card .hue-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #222;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+        }
+        .color-picker-card .hue-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid #222;
+            cursor: pointer;
+        }
+        .color-picker-card .apply-btn {
+            background: var(--theme-color);
+            border: none;
+            border-radius: 40px;
+            padding: 8px 18px;
+            color: #1A1A1A;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+            letter-spacing: 0.5px;
+        }
+        .color-picker-card .apply-btn:hover {
+            opacity: 0.85;
+            transform: scale(0.97);
+        }
+        @media (max-width: 600px) {
+            .color-picker-card {
+                right: 10px;
+                top: 70px;
+                padding: 16px;
+                min-width: 180px;
+            }
+            .color-picker-card .sat-val-canvas {
+                width: 140px;
+                height: 140px;
+            }
+            .color-picker-card .hue-slider {
+                width: 140px;
+                height: 14px;
+                margin: 20px 0;
+            }
         }
     </style>
 </head>
 <body>
 <div class="app">
+    <!-- 导航栏 -->
     <nav class="navbar">
-        <div class="logo">KOITOHANA</div>
+        <div class="logo-wrapper" id="logoWrapper">
+            <!-- 纯图标 SVG（无边框，28px） -->
+            <svg viewBox="0 0 1000 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M698.701 48.2768C728.587 48.2363 758.474 48.2056 788.361 48.1868C802.237 48.1778 816.112 48.1656 829.989 48.1457C842.078 48.1285 854.168 48.1172 866.258 48.1134C872.665 48.1111 879.069 48.1057 885.474 48.0931C892.613 48.0792 899.753 48.0788 906.892 48.0796C909.031 48.0733 911.171 48.0671 913.375 48.0607C915.308 48.0631 917.241 48.0654 919.233 48.0679C920.923 48.0663 922.613 48.0647 924.354 48.0631C925.608 48.1336 926.861 48.2041 928.152 48.2768C928.726 48.85 929.3 49.4232 929.891 50.0138C930.071 53.2035 930.132 56.4001 930.143 59.5949C930.16 62.6792 930.16 62.6792 930.177 65.8258C930.179 69.2067 930.179 69.2067 930.183 72.656C930.188 75.0071 930.195 77.3583 930.2 79.7093C930.211 84.676 930.214 89.6424 930.212 94.6091C930.212 99.62 930.224 104.631 930.249 109.642C930.393 140.287 929.793 170.635 926.414 201.134C926.282 202.337 926.152 203.54 926.016 204.78C921.99 240.568 914.924 275.435 901.913 309.074C887.746 345.07 871.653 379.559 848.62 410.809C846.746 413.298 844.865 415.782 842.977 418.259C842.231 419.241 841.486 420.222 840.716 421.233C831.637 433.034 821.475 443.877 811.301 454.729C807.482 458.818 803.854 463.024 800.28 467.33C794.333 474.189 787.493 479.676 780.385 485.297C775.956 488.855 771.704 492.546 767.463 496.322C752.726 509.289 736.376 519.383 719.56 529.428C718.369 530.149 717.178 530.87 715.953 531.613C696.569 543.303 676.239 552.296 655.244 560.694C653.846 561.253 652.45 561.814 651.011 562.391C601.832 581.868 549.472 591.597 497.097 597.955C488.401 598.934 479.697 599.808 470.987 600.645C467.901 600.96 464.816 601.276 461.732 601.595C450.373 602.757 439.017 603.913 427.633 604.798C404.352 606.699 381.515 610.465 359.405 618.226C353.393 620.942 348.413 624.342 343.116 628.255C338.412 632.135 334.26 636.056 330.187 640.596C324.468 648.814 319.662 657.173 316.063 666.523C313.88 674.187 312.901 681.738 312.562 689.695C312.552 691.658 312.54 693.619 312.529 695.639C312.512 697.907 312.495 700.174 312.477 702.51C312.467 704.993 312.456 707.475 312.448 709.957C312.43 712.596 312.413 715.232 312.396 717.869C312.349 725.003 312.312 732.137 312.277 739.271C312.239 746.735 312.19 754.2 312.145 761.664C312.058 775.788 311.98 789.913 311.905 804.037C311.819 820.122 311.723 836.206 311.627 852.291C311.429 885.367 311.243 918.445 311.066 951.521C281.18 951.561 251.291 951.593 221.405 951.612C207.529 951.62 193.654 951.632 179.777 951.652C167.687 951.669 155.598 951.681 143.506 951.685C137.101 951.686 130.697 951.693 124.291 951.705C117.152 951.719 110.013 951.719 102.874 951.719C99.6654 951.728 99.6654 951.728 96.3905 951.737C93.4911 951.733 93.4911 951.733 90.5342 951.73C88.8429 951.732 87.1516 951.733 85.4116 951.735C84.1583 951.664 82.905 951.594 81.6135 951.521C81.0398 950.948 80.4662 950.375 79.8752 949.784C79.684 945.975 79.6162 942.159 79.5953 938.344C79.5867 937.146 79.578 935.949 79.5693 934.714C79.5432 930.71 79.531 926.708 79.5223 922.704C79.5171 921.325 79.5119 919.946 79.5067 918.525C79.4806 911.174 79.465 903.825 79.458 896.474C79.4493 890.476 79.4267 884.478 79.3867 878.48C79.1573 843.385 79.6823 809.118 85.09 774.346C85.3594 772.615 85.6271 770.883 85.9035 769.099C90.1901 741.948 96.1193 714.822 106.384 689.233C107.943 685.743 109.542 682.271 111.164 678.811C111.755 677.513 112.346 676.216 112.956 674.88C128.373 641.074 146.18 608.978 169.495 579.9C175.383 572.773 181.484 565.844 187.648 558.957C189.087 557.328 190.525 555.697 192.008 554.017C214.485 528.74 240.097 506.324 268.261 487.522C272.65 484.653 277.072 481.841 281.515 479.055C282.61 478.361 283.707 477.668 284.835 476.955C313.76 458.824 345.331 442.775 377.751 431.938C380.289 431.186 380.289 431.186 382.877 430.418C385.396 429.666 385.396 429.666 387.964 428.898C390.122 428.254 392.28 427.61 394.503 426.944C396.128 426.423 397.753 425.904 399.427 425.367C413.123 421.021 426.831 417.61 440.894 414.677C442.849 414.255 444.807 413.833 446.825 413.397C475.021 407.427 503.194 403.453 531.859 400.557C539.075 399.826 546.289 399.067 553.503 398.311C558.766 397.759 564.03 397.21 569.293 396.663C570.913 396.494 572.533 396.326 574.202 396.152C577.049 395.855 579.898 395.56 582.746 395.265C615.223 392.166 615.223 392.166 646.552 383.519C654.121 380.467 660.909 376.884 667.662 372.31C671.455 369.324 674.638 366.29 677.841 362.675C682.736 356.043 686.503 349.283 690.009 341.831C693.753 331.117 696.507 320.436 697.609 309.142C697.877 302.178 697.937 295.23 697.911 288.261C697.925 285.623 697.944 282.984 697.965 280.344C698.014 273.269 698.019 266.194 698.017 259.118C698.023 251.69 698.068 244.263 698.108 236.835C698.179 222.809 698.214 208.786 698.236 194.76C698.264 178.776 698.332 162.792 698.401 146.808C698.544 113.964 698.638 81.1207 698.701 48.2768Z" fill="currentColor"/>
+                <path d="M432.271 48.5307C432.316 59.8004 432.35 71.0808 432.371 82.3507C432.371 86.1691 432.411 89.9824 432.411 93.8007C432.661 158.164 432.663 158.164 427.611 184.241C427.309 185.831 427.002 187.413 426.691 189.051C422.568 209.556 415.577 228.489 406.321 247.211C396.128 267.054 384.062 284.229 369.101 300.741C352.702 318.611 335.37 333.821 315.821 348.181C311.588 351.321 307.44 354.571 303.291 357.821C294.037 365.061 284.538 371.697 274.711 378.131C229.478 408.106 186.189 443.269 148.931 482.781C143.509 488.996 138.374 495.398 133.291 501.891C131.2 504.517 131.194 504.521 129.061 507.201C109.681 531.748 91.8226 558.011 79.241 586.721C69.0043 610.79 60.8493 635.297 54.821 660.741C53.8858 664.607 52.8491 668.451 51.641 672.241C48.6703 682.48 47.6155 693.176 46.171 703.711C45.8547 705.884 45.5361 708.062 45.211 710.301C42.5567 729.463 42.5577 747.961 43.771 767.221C43.8545 768.617 43.9441 770.021 44.031 771.461C44.2309 774.825 44.4307 778.186 44.641 781.551C43.4938 781.551 42.343 781.551 41.161 781.551C35.8732 759.824 30.8849 738.073 26.381 716.171C25.5032 711.971 24.5906 707.782 23.671 703.591C23.2086 701.466 23.2021 701.467 22.731 699.301C22.1574 696.671 21.5903 694.037 21.001 691.411C15.6993 666.846 14.2874 642.214 13.241 617.191C13.0376 612.499 12.8331 607.812 12.621 603.121C12.4889 600.23 12.3675 597.331 12.251 594.441C11.9503 587.705 11.2286 581.457 9.87102 574.841C9.47295 566.705 9.56102 558.566 9.56102 550.421C9.56102 549.243 9.54102 548.073 9.54102 546.861C9.54102 522.042 10.3212 497.009 13.351 472.361C13.9246 470.641 14.5 468.922 15.091 467.151C15.3587 464.114 15.5772 461.074 15.751 458.031C17.0252 441.352 20.9341 425.159 24.581 408.871C25.2311 405.947 25.8618 403.028 26.491 400.101C35.6534 357.754 49.5924 317.701 69.061 278.961C85.5903 246.889 105.367 215.803 129.531 188.881C132.768 185.335 136.036 181.821 139.321 178.321C143.057 174.318 146.671 170.26 150.241 166.111C159.664 155.313 169.647 146.111 180.951 137.291C185.366 133.719 189.459 129.945 193.591 126.051C204.46 116.186 216.49 108.42 228.891 100.641C230.037 99.9124 231.191 99.1811 232.371 98.4307C257.004 82.8742 283.325 71.0107 311.031 61.9907C316.653 60.2848 322.294 58.7209 327.971 57.2107C329.518 56.7892 331.077 56.385 332.671 55.9507C365.797 47.245 398.314 47.5746 432.271 48.5307Z" fill="currentColor"/>
+                <path d="M963.793 229.265C965.514 231.844 965.514 231.844 967.27 234.476C979.86 275.019 987.861 318.897 989.867 361.277C990.599 383.449 990.566 405.646 990.519 427.826C990.516 429.261 990.514 430.695 990.51 432.174C990.484 441.791 990.425 451.409 990.342 461.027C990.333 462.297 990.324 463.567 990.316 464.876C990.288 468.432 990.246 471.988 990.203 475.542C990.17 478.557 990.17 478.557 990.135 481.633C990.046 483.186 989.958 484.741 989.867 486.342C989.294 487.489 988.72 488.635 988.129 489.816C987.811 493.865 987.569 497.919 987.369 501.975C986.844 511.168 985.836 519.972 983.823 528.96C982.839 533.592 982.163 538.213 981.503 542.903C973.898 592.705 960.317 639.524 941.196 686.099C940.443 687.938 939.689 689.777 938.913 691.673C919.622 738.282 894.243 779.949 863.712 820.055C856.483 829.367 848.751 837.943 840.233 846.107C837.391 848.895 834.906 851.686 832.446 854.806C826.953 861.278 820.773 866.487 814.302 871.959C812.651 873.414 810.999 874.87 809.297 876.369C788.089 894.955 765.538 909.237 740.241 921.745C717.114 932.815 693.515 941.616 668.298 946.508C660.781 947.863 653.263 949.124 645.69 950.124C642.392 950.588 642.392 950.588 639.027 951.06C627.059 952.37 615.016 952.045 602.994 951.969C600.552 951.96 598.112 951.953 595.671 951.946C589.745 951.925 583.821 951.898 577.897 951.861C577.775 935.129 577.683 918.396 577.628 901.665C577.6 893.892 577.563 886.119 577.504 878.347C577.447 870.823 577.416 863.3 577.402 855.777C577.393 852.93 577.374 850.083 577.346 847.236C577.164 828.209 578.74 810.628 583.112 792.056C584.642 786.505 586.366 781.144 588.435 775.772C588.951 774.412 589.464 773.053 589.994 771.653C597.663 752.166 607.976 733.844 620.158 716.823C634.356 698.846 650.736 683.847 669.024 670.127C672.819 667.323 676.631 664.544 680.455 661.78C681.665 660.905 682.877 660.029 684.123 659.128C698.206 648.999 712.514 639.201 726.846 629.428C758.679 607.718 788.972 584.921 817.778 559.297C818.79 558.399 819.802 557.499 820.845 556.573C840.864 538.696 858.313 519.246 874.627 497.956C876.694 495.269 878.792 492.606 880.893 489.945C892.456 475.053 902.116 459.158 911.645 442.917C912.596 441.338 912.596 441.338 913.568 439.726C926.643 417.911 934.529 393.856 942.934 369.962C943.692 367.834 943.692 367.834 944.465 365.662C949.642 351.082 953.963 336.534 956.84 321.326C957.07 320.125 957.297 318.924 957.534 317.687C962.9 288.408 963.289 258.939 963.793 229.265Z" fill="currentColor"/>
+            </svg>
+            <span class="logo-text">KOITOHANA</span>
+        </div>
         <ul class="nav-links">
             <li data-view="home">首页</li>
             <li data-view="portfolio">作品集</li>
@@ -601,6 +772,7 @@
         <button class="hamburger" id="hamburgerBtn"><i class="fas fa-bars"></i></button>
     </nav>
 
+    <!-- 移动端菜单 -->
     <div class="mobile-menu" id="mobileMenu">
         <ul>
             <li data-view="home">首页</li>
@@ -611,54 +783,70 @@
     </div>
     <div class="menu-overlay" id="menuOverlay"></div>
 
+    <!-- 首页 -->
     <div id="homeView" class="view">
         <div class="home-hero" id="homeHero">
-            <canvas id="waveCanvas" class="wave-canvas"></canvas>
+            <canvas id="homeBgCanvas"></canvas>
             <div class="home-name">KOITOHANA</div>
         </div>
     </div>
 
+    <!-- 作品集（无右下角装饰文字） -->
     <div id="portfolioView" class="view">
         <div class="portfolio-container">
             <div class="portfolio-header"><div class="filter-group" id="filterGroup"></div></div>
             <div id="portfolioGrid" class="grid"></div>
         </div>
-        <div class="big-signature">KOITOHANA</div>
     </div>
 
-    <!-- 关于页面 -->
+    <!-- 关于（无右下角装饰文字） -->
     <div id="aboutView" class="view">
         <div class="about-container">
             <div class="name-highlight">KoitoHana / 张海清</div>
-            <div class="subtitle">数字媒体技术专业 · 在校学生</div>
+            <div class="subtitle">数字媒体艺术专业 · 在校学生</div>
             <div class="about-text">
                 <p>现阶段自学次世代硬表面道具建模。能够独立完成简易道具完整流程：使用Maya搭建基础低模、划分UV；借助ZBrush做基础雕刻细节；Substance Painter绘制基础PBR材质。</p>
                 <p>目前练习方向：枪械、冷兵器、物品道具这类硬表面模型，正在打磨布线、材质质感等基础能力，仍在持续练习提升。</p>
-                <p style="margin-top: 1.5rem; color: #4ADE80;">意向岗位：游戏道具模型实习生</p>
+                <p style="margin-top: 1.5rem; color: var(--theme-color);">意向岗位：游戏道具模型实习生</p>
             </div>
         </div>
-        <div class="big-signature">KOITOHANA</div>
     </div>
 
-    <!-- 联系方式页面 -->
+    <!-- 联系方式（无右下角装饰文字） -->
     <div id="contactView" class="view">
         <div class="contact-container">
-            <h2 style="color:#4ADE80; margin-bottom: 1.5rem;">联系方式</h2>
+            <h2 style="color:var(--theme-color); margin-bottom: 1.5rem;">联系方式</h2>
             <div class="contact-line"><i class="fab fa-weixin"></i> 微信号：qq1823248772</div>
             <div class="contact-line"><i class="fab fa-qq"></i> QQ号：1823248772</div>
-            <div class="contact-line"><i class="fas fa-phone-alt"></i> 手机：15326406710</div>
+            <div class="contact-line"><i class="fas fa-phone-alt"></i> 手机：15326406710 / 15804065791</div>
             <div class="contact-line"><i class="fas fa-envelope"></i> 邮箱：1823248772@qq.com</div>
             <hr>
             <p style="color:#aaa; font-size:0.9rem;">欢迎联系，作品集可随时查阅。</p>
         </div>
-        <div class="big-signature">KOITOHANA</div>
     </div>
 
     <footer>© 2026 KoitoHana All Rights Reserved</footer>
 </div>
 
+<!-- 模态框 -->
 <div id="detailModal" class="modal-overlay"><div class="modal-card"><span class="close-modal">&times;</span><div id="modalDynamicContent" class="modal-content"></div></div></div>
+
+<!-- 全屏 Lightbox -->
 <div id="lightbox" class="lightbox"><span class="close-lightbox">&times;</span><img class="lightbox-img" alt="放大预览"><div class="lightbox-nav"><div class="nav-arrow left"><i class="fas fa-chevron-left"></i></div><div class="nav-arrow right"><i class="fas fa-chevron-right"></i></div></div><div class="thumbnails" id="lightboxThumbs"></div></div>
+
+<!-- 调色板 -->
+<div class="color-picker-card" id="colorPickerCard">
+    <div class="pick-label">选择主题色</div>
+    <div class="preview-row">
+        <div class="preview-box" id="previewBox"></div>
+        <input class="hex-input" id="hexInput" value="#aaa7ff" maxlength="7">
+    </div>
+    <div class="picker-area">
+        <canvas class="sat-val-canvas" id="satValCanvas" width="300" height="300"></canvas>
+        <input type="range" class="hue-slider" id="hueSlider" min="0" max="360" value="240">
+    </div>
+    <button class="apply-btn" id="applyColorBtn">应用颜色</button>
+</div>
 
 <script>
     // ======================== 作品数据 ========================
@@ -666,9 +854,9 @@
         {
             id: "katana",
             title: "武士刀",
-            tags: ["武器", "硬表面"],
+            tags: ["武器", "道具"],
             cover: "https://s41.ax1x.com/2026/06/11/pmK7eij.png",
-            description: "高精度日本刀模型，四边面布线，金属磨损材质，SP内置渲染。",
+            description: "高精度日本刀模型，四边面布线，金属磨损材质，八猴渲染。",
             renders: [
                 "https://s41.ax1x.com/2026/06/11/pmK7VoQ.png",
                 "https://s41.ax1x.com/2026/06/12/pmMG4J0.png",
@@ -689,7 +877,7 @@
             title: "TTI2011",
             tags: ["武器", "硬表面"],
             cover: "https://s41.ax1x.com/2026/06/12/pmMKb4O.png",
-            description: "战斗手枪模型，四边面布线，金属崭新与磨损材质，SP内置渲染。",
+            description: "战斗手枪高模，全硬表面拓扑，PBR流程，SP绘制，Marmoset展示。",
             renders: [
                 "https://s41.ax1x.com/2026/06/12/pmMK7E6.png",
                 "https://s41.ax1x.com/2026/06/12/pmMKoHx.png",
@@ -711,7 +899,7 @@
             title: "血瓶",
             tags: ["道具", "场景"],
             cover: "https://s41.ax1x.com/2026/06/12/pmMKO8e.png",
-            description: "奇幻世界血瓶，700面，玻璃材质，高模雕刻纹理烘焙法线贴图，SP内置渲染。",
+            description: "魔幻血瓶，玻璃+液体材质，低面数但细节丰富，实时渲染。",
             renders: [
                 "https://s41.ax1x.com/2026/06/12/pmMKO8e.png"
             ],
@@ -739,7 +927,7 @@
     let currentLightboxIndex = 0;
     let scrollTimeout = null;
 
-    // 滚动条自动消失
+    // ======================== 滚动条自动消失 ========================
     function handleScroll() {
         document.body.classList.add('scrolling');
         if (scrollTimeout) clearTimeout(scrollTimeout);
@@ -749,6 +937,7 @@
     }
     window.addEventListener('scroll', handleScroll);
 
+    // ======================== 标签颜色 ========================
     function applyTagColors() {
         for (const [tag, color] of Object.entries(tagColorMap)) {
             const style = document.createElement('style');
@@ -757,6 +946,7 @@
         }
     }
 
+    // ======================== 作品集渲染 ========================
     function renderFilterButtons() {
         const allTags = ["全部", ...new Set(worksData.flatMap(w => w.tags))];
         const html = allTags.map(tag => `<button class="filter-btn ${activeFilter === tag ? 'active' : ''}" data-filter="${tag}">${tag}</button>`).join('');
@@ -793,6 +983,7 @@
         });
     }
 
+    // ======================== 模态框 & Lightbox ========================
     function openModal(work) {
         const modal = document.getElementById("detailModal");
         const contentDiv = document.getElementById("modalDynamicContent");
@@ -881,21 +1072,22 @@
         if (endX - 50 > touchStartX) prevImage();
     });
 
-    // 导航切换（支持桌面端 + 移动端菜单）
+    // ======================== 导航切换 ========================
     function switchToView(viewId) {
         document.querySelectorAll(".view").forEach(v => v.classList.remove("active-view"));
         document.getElementById(`${viewId}View`).classList.add("active-view");
-        if (viewId === "home") {
-            document.querySelectorAll(".big-signature").forEach(s => s.style.display = "none");
-        } else {
-            document.querySelectorAll(".big-signature").forEach(s => s.style.display = "block");
-        }
         if (viewId === "portfolio") renderPortfolio();
-        onViewChange(viewId);
         closeMobileMenu();
     }
 
-    // 移动端菜单控制
+    document.querySelectorAll(".nav-links li").forEach(li => {
+        li.addEventListener("click", () => {
+            const view = li.dataset.view;
+            switchToView(view);
+        });
+    });
+
+    // 移动端菜单
     const hamburger = document.getElementById('hamburgerBtn');
     const mobileMenu = document.getElementById('mobileMenu');
     const menuOverlay = document.getElementById('menuOverlay');
@@ -920,34 +1112,49 @@
         });
     });
 
-    document.querySelectorAll(".nav-links li").forEach(li => {
-        li.addEventListener("click", () => {
-            const view = li.dataset.view;
-            switchToView(view);
-        });
-    });
-
-    // 正弦波流光动画
-    const canvas = document.getElementById('waveCanvas');
-    let ctx = canvas.getContext('2d');
-    let width, height, animationId = null;
+    // ======================== 首页 Canvas 背景 ========================
+    const canvas = document.getElementById('homeBgCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
     let time = 0;
-    const WAVE_COUNT = 4;
-    const COLORS = ['#4ADE80', '#6EE7B0', '#3A8754', '#86EFAC'];
+    let animId = null;
     let waves = [];
+    let currentThemeColor = '#aaa7ff';
+
+    function hexToRgb(hex) {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        return result ? {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        } : null;
+    }
+
+    function generateWaveColors(hex) {
+        const base = hexToRgb(hex);
+        if (!base) return ['#aaa7ff', '#c8c5ff', '#8a87d9', '#b5b2ff'];
+        const r = base.r, g = base.g, b = base.b;
+        return [
+            `rgb(${Math.min(255,r+40)},${Math.min(255,g+40)},${Math.min(255,b+40)})`,
+            `rgb(${Math.min(255,r+80)},${Math.min(255,g+80)},${Math.min(255,b+80)})`,
+            `rgb(${r},${g},${b})`,
+            `rgb(${Math.min(255,r+20)},${Math.min(255,g+20)},${Math.min(255,b+20)})`
+        ];
+    }
 
     function initWaves() {
         waves = [];
-        const baseYStart = 0.55;
-        const baseYRange = 0.20;
-        for (let i = 0; i < WAVE_COUNT; i++) {
+        const baseYStart = 0.50;
+        const baseYRange = 0.25;
+        const colors = generateWaveColors(currentThemeColor);
+        for (let i = 0; i < 4; i++) {
             waves.push({
-                amplitude: 18 + Math.random() * 25,
+                amplitude: 20 + Math.random() * 30,
                 frequency: 0.006 + Math.random() * 0.006,
                 speed: 0.30 + Math.random() * 0.20,
                 phaseOffset: Math.random() * Math.PI * 2,
-                baseY: baseYStart + (i / (WAVE_COUNT - 1)) * baseYRange,
-                color: COLORS[i % COLORS.length],
+                baseY: baseYStart + (i / 3) * baseYRange,
+                color: colors[i % colors.length],
                 lineWidth: 2.2 + Math.random() * 1.5,
             });
         }
@@ -956,8 +1163,9 @@
     function resizeCanvas() {
         const hero = document.getElementById('homeHero');
         if (!hero) return;
-        width = hero.clientWidth;
-        height = hero.clientHeight;
+        const rect = hero.getBoundingClientRect();
+        width = rect.width;
+        height = rect.height;
         canvas.width = width;
         canvas.height = height;
         drawWaves();
@@ -965,9 +1173,12 @@
 
     function drawWaves() {
         if (!ctx || width === 0 || height === 0) return;
+        // 清除（由于 body 已有渐变，这里只负责画波浪）
         ctx.clearRect(0, 0, width, height);
+        // 绘制波浪（透明背景上画彩色线条）
+        if (!waves.length) return;
         for (let w of waves) {
-            const step = width / 250;
+            const step = Math.max(1, width / 250);
             ctx.beginPath();
             ctx.lineWidth = w.lineWidth;
             ctx.strokeStyle = w.color;
@@ -982,10 +1193,11 @@
                 else ctx.lineTo(x, y);
             }
             ctx.stroke();
+            // 光晕层
             ctx.beginPath();
-            ctx.lineWidth = w.lineWidth * 0.7;
+            ctx.lineWidth = w.lineWidth * 0.6;
             ctx.strokeStyle = w.color + 'cc';
-            ctx.shadowBlur = 32;
+            ctx.shadowBlur = 40;
             first = true;
             for (let x = 0; x <= width; x += step) {
                 const angle = w.frequency * x + time * w.speed + w.phaseOffset;
@@ -1000,42 +1212,237 @@
     }
 
     function animateWaves() {
-        if (!canvas.isConnected) return;
         time += 0.022;
         drawWaves();
-        animationId = requestAnimationFrame(animateWaves);
+        animId = requestAnimationFrame(animateWaves);
     }
 
     function startWaveAnimation() {
-        if (animationId) cancelAnimationFrame(animationId);
+        if (animId) cancelAnimationFrame(animId);
         initWaves();
         resizeCanvas();
         animateWaves();
     }
 
-    function onViewChange(viewId) {
-        if (viewId === 'home') {
-            if (!animationId) startWaveAnimation();
-            else resizeCanvas();
-        } else {
-            if (animationId) {
-                cancelAnimationFrame(animationId);
-                animationId = null;
-                if (ctx) ctx.clearRect(0, 0, width, height);
-            }
+    window.addEventListener('resize', () => {
+        if (document.getElementById('homeView').classList.contains('active-view')) {
+            resizeCanvas();
         }
+    });
+
+    // ======================== 主题色更新函数 ========================
+    function updateThemeColor(newColor) {
+        currentThemeColor = newColor;
+        const root = document.documentElement;
+        root.style.setProperty('--theme-color', newColor);
+        const rgb = hexToRgb(newColor);
+        if (rgb) {
+            const light = `rgb(${Math.min(255, rgb.r+60)},${Math.min(255, rgb.g+60)},${Math.min(255, rgb.b+60)})`;
+            const dark = `rgb(${Math.max(0, rgb.r-40)},${Math.max(0, rgb.g-40)},${Math.max(0, rgb.b-40)})`;
+            const glow = `rgba(${rgb.r},${rgb.g},${rgb.b},0.6)`;
+            root.style.setProperty('--theme-light', light);
+            root.style.setProperty('--theme-dark', dark);
+            root.style.setProperty('--theme-glow', glow);
+            root.style.setProperty('--theme-border', newColor);
+        }
+        initWaves();
+        document.getElementById('previewBox').style.background = newColor;
+        document.getElementById('hexInput').value = newColor;
+        drawWaves();
     }
 
+    // ======================== 调色板控制 ========================
+    const pickerCard = document.getElementById('colorPickerCard');
+    const satValCanvas = document.getElementById('satValCanvas');
+    const satValCtx = satValCanvas.getContext('2d');
+    const hueSlider = document.getElementById('hueSlider');
+    const hexInput = document.getElementById('hexInput');
+    const previewBox = document.getElementById('previewBox');
+    const applyBtn = document.getElementById('applyColorBtn');
+
+    let currentHue = 240, currentSat = 0.8, currentVal = 0.6;
+    let isPointerDown = false;
+
+    function drawSatValCanvas(hue) {
+        const w = satValCanvas.width, h = satValCanvas.height;
+        const imageData = satValCtx.createImageData(w, h);
+        const data = imageData.data;
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                const sat = x / w;
+                const val = 1 - (y / h);
+                const rgb = hsvToRgb(hue, sat, val);
+                const idx = (y * w + x) * 4;
+                data[idx] = rgb[0];
+                data[idx+1] = rgb[1];
+                data[idx+2] = rgb[2];
+                data[idx+3] = 255;
+            }
+        }
+        satValCtx.putImageData(imageData, 0, 0);
+    }
+
+    function hsvToRgb(h, s, v) {
+        let r, g, b;
+        const i = Math.floor(h / 60) % 6;
+        const f = h / 60 - Math.floor(h / 60);
+        const p = v * (1 - s);
+        const q = v * (1 - f * s);
+        const t = v * (1 - (1 - f) * s);
+        switch (i) {
+            case 0: r = v; g = t; b = p; break;
+            case 1: r = q; g = v; b = p; break;
+            case 2: r = p; g = v; b = t; break;
+            case 3: r = p; g = q; b = v; break;
+            case 4: r = t; g = p; b = v; break;
+            case 5: r = v; g = p; b = q; break;
+            default: r = 0; g = 0; b = 0;
+        }
+        return [Math.round(r*255), Math.round(g*255), Math.round(b*255)];
+    }
+
+    function rgbToHex(r, g, b) {
+        return '#' + [r,g,b].map(c => c.toString(16).padStart(2, '0')).join('');
+    }
+
+    function rgbToHsv(r, g, b) {
+        r /= 255; g /= 255; b /= 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        let h, s, v = max;
+        const d = max - min;
+        s = max === 0 ? 0 : d / max;
+        if (max === min) h = 0;
+        else {
+            switch (max) {
+                case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                case g: h = (b - r) / d + 2; break;
+                case b: h = (r - g) / d + 4; break;
+            }
+            h /= 6;
+        }
+        return [h * 360, s, v];
+    }
+
+    function updateColorFromPicker() {
+        const hue = parseFloat(hueSlider.value);
+        currentHue = hue;
+        drawSatValCanvas(hue);
+        const rgb = hsvToRgb(hue, currentSat, currentVal);
+        const hex = rgbToHex(rgb[0], rgb[1], rgb[2]);
+        previewBox.style.background = hex;
+        hexInput.value = hex;
+    }
+
+    function handleSatValMove(e) {
+        if (!isPointerDown) return;
+        const rect = satValCanvas.getBoundingClientRect();
+        const scaleX = satValCanvas.width / rect.width;
+        const scaleY = satValCanvas.height / rect.height;
+        let clientX, clientY;
+        if (e.touches) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+            e.preventDefault();
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+        let x = (clientX - rect.left) * scaleX;
+        let y = (clientY - rect.top) * scaleY;
+        x = Math.min(Math.max(x, 0), satValCanvas.width);
+        y = Math.min(Math.max(y, 0), satValCanvas.height);
+        const sat = x / satValCanvas.width;
+        const val = 1 - (y / satValCanvas.height);
+        currentSat = sat;
+        currentVal = val;
+        const hue = parseFloat(hueSlider.value);
+        const rgb = hsvToRgb(hue, sat, val);
+        const hex = rgbToHex(rgb[0], rgb[1], rgb[2]);
+        previewBox.style.background = hex;
+        hexInput.value = hex;
+    }
+
+    satValCanvas.addEventListener('mousedown', (e) => {
+        isPointerDown = true;
+        handleSatValMove(e);
+    });
+    window.addEventListener('mousemove', handleSatValMove);
+    window.addEventListener('mouseup', () => { isPointerDown = false; });
+    satValCanvas.addEventListener('touchstart', (e) => {
+        isPointerDown = true;
+        handleSatValMove(e);
+    });
+    satValCanvas.addEventListener('touchmove', handleSatValMove);
+    satValCanvas.addEventListener('touchend', () => { isPointerDown = false; });
+
+    hueSlider.addEventListener('input', updateColorFromPicker);
+
+    hexInput.addEventListener('input', () => {
+        let val = hexInput.value.trim();
+        if (/^#?[0-9a-f]{6}$/i.test(val)) {
+            if (!val.startsWith('#')) val = '#' + val;
+            previewBox.style.background = val;
+            const rgb = hexToRgb(val);
+            if (rgb) {
+                const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+                hueSlider.value = hsv[0];
+                currentSat = hsv[1];
+                currentVal = hsv[2];
+                drawSatValCanvas(hsv[0]);
+            }
+        }
+    });
+
+    applyBtn.addEventListener('click', () => {
+        const hex = hexInput.value.trim();
+        if (/^#?[0-9a-f]{6}$/i.test(hex)) {
+            const finalHex = hex.startsWith('#') ? hex : '#' + hex;
+            updateThemeColor(finalHex);
+            pickerCard.classList.remove('open');
+        }
+    });
+
+    // 点击 Logo 切换调色板
+    document.getElementById('logoWrapper').addEventListener('click', (e) => {
+        e.stopPropagation();
+        pickerCard.classList.toggle('open');
+        if (pickerCard.classList.contains('open')) {
+            const currentHex = currentThemeColor;
+            hexInput.value = currentHex;
+            previewBox.style.background = currentHex;
+            const rgb = hexToRgb(currentHex);
+            if (rgb) {
+                const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b);
+                hueSlider.value = hsv[0];
+                currentSat = hsv[1];
+                currentVal = hsv[2];
+                drawSatValCanvas(hsv[0]);
+            }
+            updateColorFromPicker();
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!pickerCard.contains(e.target) && e.target !== document.getElementById('logoWrapper') && !document.getElementById('logoWrapper').contains(e.target)) {
+            pickerCard.classList.remove('open');
+        }
+    });
+
+    drawSatValCanvas(240);
+    previewBox.style.background = '#aaa7ff';
+    hexInput.value = '#aaa7ff';
+
+    // ======================== 初始化 ========================
     window.addEventListener('load', () => {
         applyTagColors();
         renderFilterButtons();
         renderPortfolio();
         switchToView('home');
+        updateThemeColor('#aaa7ff');
         startWaveAnimation();
-        window.addEventListener('resize', () => {
-            if (document.getElementById('homeView').classList.contains('active-view')) resizeCanvas();
-        });
     });
+
+    window.updateTheme = updateThemeColor;
 </script>
 </body>
 </html>
