@@ -71,18 +71,19 @@
     @keyframes auroraSpin { to { transform: rotate(360deg); } }
 
     .blob {
-        position: absolute; border-radius: 50%; filter: blur(100px); opacity: .8;
+        position: absolute; border-radius: 50%; filter: blur(72px); opacity: .88;
         will-change: transform; animation: drift 18s ease-in-out infinite;
     }
-    .b1 { width: 760px; height: 760px; left: -220px; top: -240px; background: radial-gradient(circle, rgba(186,146,255,.85), transparent 66%); }
-    .b2 { width: 700px; height: 700px; right: -200px; top: -100px; background: radial-gradient(circle, rgba(140,214,255,.75), transparent 66%); animation-delay: -8s; }
-    .b3 { width: 640px; height: 640px; left: 26%; top: 44%; background: radial-gradient(circle, rgba(255,168,214,.6), transparent 68%); animation-delay: -15s; }
-    .b4 { width: 720px; height: 720px; right: 4%; bottom: -300px; background: radial-gradient(circle, rgba(158,190,255,.6), transparent 68%); animation-delay: -21s; }
+    .b1 { width: 760px; height: 760px; left: -220px; top: -240px; background: radial-gradient(circle, rgba(186,146,255,.85), transparent 66%); animation-duration: 26s; }
+    .b2 { width: 700px; height: 700px; right: -200px; top: -100px; background: radial-gradient(circle, rgba(140,214,255,.75), transparent 66%); animation-duration: 33s; animation-delay: -8s; }
+    .b3 { width: 640px; height: 640px; left: 26%; top: 44%; background: radial-gradient(circle, rgba(255,168,214,.6), transparent 68%); animation-duration: 29s; animation-delay: -15s; }
+    .b4 { width: 720px; height: 720px; right: 4%; bottom: -300px; background: radial-gradient(circle, rgba(158,190,255,.6), transparent 68%); animation-duration: 37s; animation-delay: -21s; }
     @keyframes drift {
-        0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-        28% { transform: translate3d(48px, -40px, 0) scale(1.08); }
-        55% { transform: translate3d(-36px, 34px, 0) scale(0.95); }
-        80% { transform: translate3d(22px, 26px, 0) scale(1.04); }
+        0%   { transform: translate3d(0, 0, 0) scale(1); }
+        25%  { transform: translate3d(150px, -95px, 0) scale(1.14); }
+        50%  { transform: translate3d(-70px, 70px, 0) scale(0.90); }
+        75%  { transform: translate3d(80px, 130px, 0) scale(1.08); }
+        100% { transform: translate3d(0, 0, 0) scale(1); }
     }
     /* 幻彩背景上的网点（像凑近看电视机的像素点） */
     .mesh {
@@ -191,15 +192,6 @@
         animation: plateIn 1s cubic-bezier(.2,.8,.3,1) both;
     }
     /* 文字背后的柔光，只为让玻璃字有对比，不是一块板 */
-    .plate::before {
-        content: ""; position: absolute; inset: -26% -14%; z-index: -1;
-        background:
-            radial-gradient(46% 58% at 34% 46%, rgba(178,140,255,.75), transparent 70%),
-            radial-gradient(42% 52% at 68% 54%, rgba(126,212,255,.6), transparent 70%),
-            radial-gradient(40% 48% at 52% 78%, rgba(255,168,214,.5), transparent 72%);
-        filter: blur(38px);
-        opacity: .8;
-    }
     @keyframes plateIn { from { opacity: 0; transform: translateY(18px) scale(.985); } to { opacity: 1; transform: none; } }
 
     /* 标题：薰衣草紫 */
@@ -336,6 +328,21 @@
     .dl-side small { font-size: 11px; color: var(--muted); text-align: center; line-height: 1.7; word-break: break-all; }
 
     /* ================= FAQ ================= */
+    /* ---------- 更新日志 ---------- */
+    .log-card { padding: 10px 40px; }
+    .log-item { padding: 26px 0; border-bottom: 1px solid var(--line); }
+    .log-item:last-child { border-bottom: none; }
+    .log-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+    .log-ver { font-weight: 700; font-size: 1.05rem; letter-spacing: -.2px; }
+    .log-tag { font-size: .7rem; padding: 3px 10px; border-radius: 999px; font-weight: 700; background: rgba(155,114,242,.16); color: var(--lav-ink); }
+    .log-date { margin-left: auto; font-size: .78rem; color: var(--muted); }
+    .log-body ul { list-style: none; display: grid; gap: 7px; }
+    .log-body li { font-size: .92rem; color: var(--ink-2); padding-left: 18px; position: relative; line-height: 1.7; }
+    .log-body li::before {
+        content: ""; position: absolute; left: 2px; top: 9px; width: 6px; height: 6px; border-radius: 50%;
+        background: var(--lav-3);
+    }
+
     .faq { max-width: 860px; margin: 0 auto; }
     .faq.glass { padding: 2px 42px; }
     .faq details { border-bottom: 1px solid var(--line); }
@@ -406,6 +413,7 @@
             <a href="#features">功能</a>
             <a href="#gallery">个性化</a>
             <a href="#wallpaper">壁纸</a>
+            <a href="#changelog">更新日志</a>
             <a href="#download">下载</a>
             <a href="#faq">常见问题</a>
         </nav>
@@ -426,7 +434,7 @@
         </div>
         <div class="hero-meta">
             <span><b>107 MB</b> 解压即用</span>
-            <span><b>v1.0.0</b> 2026-10-26</span>
+            <span><b>v1.1.0</b> 2026-10-26</span>
             <span><b>免费</b> 无广告</span>
         </div>
 
@@ -572,6 +580,71 @@
         </div>
     </section>
 
+    <!-- ============ 更新日志 ============ -->
+    <section id="changelog">
+        <div class="wrap">
+            <div class="sec-head reveal">
+                <div class="kicker">Changelog</div>
+                <h2>更新日志</h2>
+                <p>软件内「设置 → 关于 → 检查更新」可自动升级。</p>
+            </div>
+
+            <div class="glass log-card reveal">
+                <div class="log-item">
+                    <div class="log-head">
+                        <span class="log-ver">v1.1.0</span>
+                        <span class="log-tag">最新</span>
+                        <span class="log-date">2026-10-26</span>
+                    </div>
+                    <div class="log-body">
+                        <ul>
+                            <li>新增幻彩背景：动态渐变光斑 + CRT 网点纹理</li>
+                            <li>新增视频背景：本地视频静音循环播放</li>
+                            <li>新增图片背景，三种背景互斥，全部关闭为纯白</li>
+                            <li>新增视频 / 图片背景历史记录，各 6 条，点击即切换</li>
+                            <li>新增视频封面自动截取首帧生成缩略图</li>
+                            <li>新增启动动画支持幻彩与视频背景的圆形遮罩展开</li>
+                            <li>优化背景选择改走系统对话框，只记录路径不复制文件</li>
+                            <li>优化启动动画的幻彩与主界面共用同一套样式</li>
+                            <li>修复背景开关白字透明底、启动遮罩展开后空白</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="log-item">
+                    <div class="log-head">
+                        <span class="log-ver">v1.0.0</span>
+                        <span class="log-date">2026-10-26</span>
+                    </div>
+                    <div class="log-body">
+                        <ul>
+                            <li>新增便签模块：六种底色、输入即保存</li>
+                            <li>新增 设置 →「模块」：拖拽排序、启用禁用</li>
+                            <li>新增在线更新：检查 → 下载 → 校验 → 自动替换重启</li>
+                            <li>新增内置默认 AI 智能体「缇娜」，API Key 自行填写</li>
+                            <li>AI 情绪识别改为打分制，扩充至九种情绪</li>
+                            <li>立绘每种情绪最多三张，切换随机并交叉淡入</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="log-item">
+                    <div class="log-head">
+                        <span class="log-ver">v0.9</span>
+                        <span class="log-tag">beta</span>
+                        <span class="log-date">内测</span>
+                    </div>
+                    <div class="log-body">
+                        <ul>
+                            <li>音乐模块：登录、搜索、歌单、歌词、音质切换与 VIP 播放</li>
+                            <li>标签页右键菜单、拖动排序、关闭恢复</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- ============ 下载 ============ -->
     <section id="download">
         <div class="wrap">
@@ -583,19 +656,19 @@
 
             <div class="glass dl reveal">
                 <div>
-                    <h3>Windows 版 v1.0.0</h3>
+                    <h3>Windows 版 v1.1.0</h3>
                     <p>适用于 Windows 10 / 11（64 位）。解压后运行 HanaSpace.exe，无需安装。</p>
                     <div class="specs">
-                        <div class="spec">版本<b>1.0.0</b></div>
+                        <div class="spec">版本<b>1.1.0</b></div>
                         <div class="spec">大小<b>107 MB</b></div>
                         <div class="spec">更新<b>2026-10-26</b></div>
                         <div class="spec">格式<b>ZIP</b></div>
                     </div>
                 </div>
                 <div class="dl-side">
-                    <a class="btn btn-primary" href="https://hanaspace-1442437147.cos.ap-shanghai.myqcloud.com/HanaSpace-1.0.0.zip" download>下载 ZIP</a>
+                    <a class="btn btn-primary" href="https://hanaspace-1442437147.cos.ap-shanghai.myqcloud.com/HanaSpace-1.1.0.zip" download>下载 ZIP</a>
                     <a class="btn btn-ghost" href="#faq">安装说明</a>
-                    <small>SHA-256<br>b008ae99…764003a</small>
+                    <small>SHA-256<br>e4d44b59…5c4f1b4</small>
                 </div>
             </div>
         </div>
